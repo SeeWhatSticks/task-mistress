@@ -1,11 +1,11 @@
 import json
 import typing
-from data_classes.Lists import PlayerList, TaskList, InterfaceList
+from data_classes.Lists import CategoryList, PlayerList, TaskList, InterfaceList
 from discord import Member
 from discord.ext import commands
 
 CONFIG_FILE = "config.json"
-CATEGORIES_FILE = "categories.json"
+CATEGORY_LIST_FILE = "data/categories.p"
 PLAYER_LIST_FILE = "data/players.p"
 TASK_LIST_FILE = "data/tasks.p"
 INTERFACE_LIST_FILE = "data/interfaces.p"
@@ -49,8 +49,8 @@ class TaskMistress(commands.Bot):
         }
 
         self.config = load_critical_config_file(CONFIG_FILE)
-        self.categories = load_critical_config_file(CATEGORIES_FILE)
 
+        self.category_list = CategoryList(self, CATEGORY_LIST_FILE)
         self.player_list = PlayerList(self, PLAYER_LIST_FILE)
         self.task_list = TaskList(self, TASK_LIST_FILE)
         self.interface_list = InterfaceList(self, INTERFACE_LIST_FILE)

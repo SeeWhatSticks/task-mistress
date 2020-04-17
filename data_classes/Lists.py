@@ -1,5 +1,6 @@
 import pickle
 from data_classes import Player
+from discord import Emoji
 
 class PickledList:
     def __init__(self, bot, path):
@@ -20,6 +21,16 @@ class PickledList:
         except (OSError, pickle.PickleError):
             print("Error loading {}. Storing empty file.".format(self.__path))
             self.save_list()
+
+
+class CategoryList(PickledList):
+    def get_category_by_id(self, category_id: str):
+        """Return the Category for a given category_id, or None."""
+        raise NotImplementedError
+
+    def get_category_by_emoji(self, emoji: Emoji):
+        """Return the Category associated with a given Emoji, or None."""
+        raise NotImplementedError
 
 
 class PlayerList(PickledList):
