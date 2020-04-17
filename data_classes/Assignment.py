@@ -13,8 +13,10 @@ class Assignment:
         self.verifiers = []
 
     def mark_completed(self):
+        """Mark an assignment as completed and record the completion time."""
         self.completed = True
         self.completion_time = datetime.utcnow()
 
     def add_verifier(self, verifier_id):
+        """Record a verifier of a completed Assignment."""
         self.verifiers.append(verifier_id)
