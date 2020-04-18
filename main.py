@@ -25,7 +25,7 @@ class TaskMistress(commands.Bot):
 
         self.SYMBOLS = {
             'CHECK_MARK': "\U00002705",
-            'NUMBER_BUTTONS': {
+            'RATINGS': {
                 '1\U0000FE0F\U000020E3': 1,
                 '2\U0000FE0F\U000020E3': 2,
                 '3\U0000FE0F\U000020E3': 3,
@@ -34,6 +34,8 @@ class TaskMistress(commands.Bot):
             },
             'BKWD_ARROW': "\U000025C0\U0000FE0F",
             'FRWD_ARROW': "\U000025B6\U0000FE0F",
+            'REFRESH': "\U0000267B\U0000FE0F",
+            'DELETE': "\U0001F5D1\U0000FE0F",
             'AVAILABLE': "\U00002600\U0000FE0F",
             'UNAVAILABLE': "\U0001F319",
             'UNSET_ALL': "\U0001F3F4\U0000200D\U00002620\U0000FE0F",

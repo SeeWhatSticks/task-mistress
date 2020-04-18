@@ -3,6 +3,7 @@ from data_classes import Player
 from discord import Emoji
 
 class PickledList:
+    """A class that creates a dictionary and manages loading and saving the dictionary to a specified pickle file."""
     def __init__(self, bot, path):
         self.bot = bot
         self.__path = path
@@ -24,6 +25,8 @@ class PickledList:
 
 
 class CategoryList(PickledList):
+    """Manages a dictionary mapping category_id to Category."""
+
     def get_category_by_id(self, category_id: str):
         """Return the Category for a given category_id, or None."""
         raise NotImplementedError
@@ -34,6 +37,8 @@ class CategoryList(PickledList):
 
 
 class PlayerList(PickledList):
+    """Manages a dictionary mapping user_id to Player"""
+
     def get_player_by_id(self, user_id: int):
         """Return a Player for a given user_id. Adds the Player if not already in the PlayerList."""
         if user_id not in self.__list:
@@ -51,6 +56,8 @@ class PlayerList(PickledList):
 
 
 class TaskList(PickledList):
+    """Manages a dictionary mapping task_id to Task."""
+
     def get_task_by_id(self, task_id: int):
         """Return a Task for a given task_id, or None."""
         if task_id in self.__list:
@@ -75,6 +82,26 @@ class TaskList(PickledList):
 
 
 class InterfaceList(PickledList):
+    """Manages a dictionary mapping message_id to Interface."""
+
+    def add_actionsinterface(self):
+        raise NotImplementedError
+
+    def add_limitsinterface(self):
+        raise NotImplementedError
+
+    def add_categoriesinterface(self):
+        raise NotImplementedError
+
+    def add_assignmentsinterface(self):
+        raise NotImplementedError
+
+    def add_tasksinterface(self):
+        raise NotImplementedError
+
+    def add_verificationinterface(self):
+        raise NotImplementedError
+
     def get_interface_by_id(self, message_id: int):
         """Return an Interface for a given message_id, or None."""
         if message_id in self.__list:
