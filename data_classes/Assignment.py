@@ -1,4 +1,7 @@
 from datetime import datetime
+import logging
+
+log = logging.getLogger(__name__)
 
 class Assignment:
     def __init__(self, task_id, assigner_id):

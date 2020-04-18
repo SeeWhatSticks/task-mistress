@@ -1,6 +1,9 @@
+import logging
 import pickle
 from data_classes import Player
-from discord import Emoji
+from discord import Emoji, User
+
+log = logging.getLogger(__name__)
 
 class PickledList:
     """A class that creates a dictionary and manages loading and saving the dictionary to a specified pickle file."""
@@ -9,19 +12,19 @@ class PickledList:
         self.__path = path
         self.__list = {}
 
-        self.load_list()
+        self.load()
 
-    def save_list(self):
+    def save(self):
         """Pickle the list and save to a file."""
         pickle.dump(self.__list, open(self.__path, 'wb'))
 
-    def load_list(self):
+    def load(self):
         """Load a file and unpickle the list."""
         try:
             self.__list = pickle.load(open(self.__path, 'rb'))
         except (OSError, pickle.PickleError):
-            print("Error loading {}. Storing empty file.".format(self.__path))
-            self.save_list()
+            log.warning("Error loading {}. Storing empty file.".format(self.__path))
+            self.save()
 
 
 class CategoryList(PickledList):
@@ -39,11 +42,11 @@ class CategoryList(PickledList):
 class PlayerList(PickledList):
     """Manages a dictionary mapping user_id to Player"""
 
-    def get_player_by_id(self, user_id: int):
+    def get_player(self, user: User):
         """Return a Player for a given user_id. Adds the Player if not already in the PlayerList."""
-        if user_id not in self.__list:
-            self.__list[user_id] = Player(user_id)
-        return self.__list[user_id]
+        if user.id not in self.__list:
+            self.__list[user.id] = Player(user.id)
+        return self.__list[user.id]
 
     def get_available_players(self):
         """Return a dict mapping player_id to Player for Players who are marked as available."""

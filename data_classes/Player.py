@@ -1,4 +1,7 @@
+import logging
 from data_classes import Assignment
+
+log = logging.getLogger(__name__)
 
 class Player:
     def __init__(self, player_id):

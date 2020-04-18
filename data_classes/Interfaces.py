@@ -1,5 +1,8 @@
+import logging
 from discord import Embed, Emoji, Member, Reaction
 from discord import NotFound, Forbidden, HTTPException
+
+log = logging.getLogger(__name__)
 
 class Interface:
     """

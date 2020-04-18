@@ -1,3 +1,7 @@
+import logging
+
+log = logging.getLogger(__name__)
+
 class Task:
     def __init__(self, task_id, task_text, task_name: None):
         self.task_id = task_id

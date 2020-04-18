@@ -1,8 +1,13 @@
 import json
+import logging
 import typing
 from data_classes.Lists import CategoryList, PlayerList, TaskList, InterfaceList
 from discord import Member
 from discord.ext import commands
+
+log = logging.getLogger(__name__)
+logging.basicConfig()
+log.setLevel(logging.DEBUG)
 
 CONFIG_FILE = "config.json"
 CATEGORY_LIST_FILE = "data/categories.p"
@@ -32,8 +37,8 @@ class TaskMistress(commands.Bot):
                 '4\U0000FE0F\U000020E3': 4,
                 '5\U0000FE0F\U000020E3': 5
             },
-            'BKWD_ARROW': "\U000025C0\U0000FE0F",
-            'FRWD_ARROW': "\U000025B6\U0000FE0F",
+            'BACKKWARD': "\U000025C0\U0000FE0F",
+            'FORWARD': "\U000025B6\U0000FE0F",
             'REFRESH': "\U0000267B\U0000FE0F",
             'DELETE': "\U0001F5D1\U0000FE0F",
             'AVAILABLE': "\U00002600\U0000FE0F",
@@ -58,9 +63,9 @@ class TaskMistress(commands.Bot):
         self.interface_list = InterfaceList(self, INTERFACE_LIST_FILE)
 
     def save_data(self):
-        self.player_list.save_data()
-        self.task_list.save_data()
-        self.interface_list.save_data()
+        self.player_list.save()
+        self.task_list.save()
+        self.interface_list.save()
 
     def when_mentioned(self):
         return [
@@ -72,6 +77,7 @@ class TaskMistress(commands.Bot):
 
     async def on_ready(self):
         print("We have logged in as {}".format(self.user))
+        log.info("We have logged in as {}".format(self.user))
 
     async def on_message(self, message):
         if message.author.bot:
@@ -120,8 +126,8 @@ def main():
         with open('token.txt', 'r') as file:
             bot.run(file.read())
     except IOError as exc:
-        print(str(exc))
-        print("Could not load/read token.txt D:")
+        log.exception(exc, exc_info=exc)
+        log.error("Could not load/read token.txt D:")
         raise SystemExit
 
 
