@@ -28,33 +28,6 @@ class TaskMistress(commands.Bot):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.SYMBOLS = {
-            'CHECK_MARK': "\U00002705",
-            'RATINGS': {
-                '1\U0000FE0F\U000020E3': 1,
-                '2\U0000FE0F\U000020E3': 2,
-                '3\U0000FE0F\U000020E3': 3,
-                '4\U0000FE0F\U000020E3': 4,
-                '5\U0000FE0F\U000020E3': 5
-            },
-            'BACKKWARD': "\U000025C0\U0000FE0F",
-            'FORWARD': "\U000025B6\U0000FE0F",
-            'REFRESH': "\U0000267B\U0000FE0F",
-            'DELETE': "\U0001F5D1\U0000FE0F",
-            'AVAILABLE': "\U00002600\U0000FE0F",
-            'UNAVAILABLE': "\U0001F319",
-            'UNSET_ALL': "\U0001F3F4\U0000200D\U00002620\U0000FE0F",
-            'SET_ALL': "\U0001F3F3\U0000FE0F",
-            'BEG': "\U0001F3B0"
-        }
-        self.COLORS = {
-            'default': 0x3300cc,
-            'set': 0x003399,
-            'verify': 0xff3399,
-            'confirm': 0x33ff33,
-            'error': 0xff3333
-        }
-
         self.config = load_critical_config_file(CONFIG_FILE)
 
         self.category_list = CategoryList(self, CATEGORY_LIST_FILE)
@@ -67,7 +40,7 @@ class TaskMistress(commands.Bot):
         self.task_list.save()
         self.interface_list.save()
 
-    def when_mentioned(self):
+    def when_mentioned(self, message):
         return [
             '{} '.format(self.user.mention),
             '<@!{}> '.format(self.user.id)]
@@ -76,7 +49,6 @@ class TaskMistress(commands.Bot):
         await ctx.channel.send(str(error))
 
     async def on_ready(self):
-        print("We have logged in as {}".format(self.user))
         log.info("We have logged in as {}".format(self.user))
 
     async def on_message(self, message):
@@ -90,6 +62,10 @@ class TaskMistress(commands.Bot):
 
 
 bot = TaskMistress(command_prefix=TaskMistress.when_mentioned)
+
+@bot.command(hidden=True)
+async def foo(ctx):
+    """Useless testing function."""
 
 @bot.command()
 async def assign(ctx, target: Member, task_id: typing.Optional[int]):

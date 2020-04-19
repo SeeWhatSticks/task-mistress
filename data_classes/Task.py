@@ -1,10 +1,12 @@
 import logging
+from datetime import datetime
 
 log = logging.getLogger(__name__)
 
 class Task:
-    def __init__(self, task_id, task_text, task_name: None):
+    def __init__(self, task_id: int, task_text: str, task_name):
         self.task_id = task_id
+        self.creation_time = datetime.utcnow()
 
         self.task_text = task_text
         self.task_name = task_name
@@ -30,11 +32,11 @@ class Task:
 
     def unset_categories(self):
         """Unset all categories."""
-        self.__categories = self.categories.clear()
+        self.__categories.clear()
 
     def get_severity(self):
         """Calculate severity, based on the current severity ratings."""
-        return "/5".format(round(sum(self.ratings.values())/len(self.ratings), 1))
+        return "{}/5".format(round(sum(self.ratings.values())/len(self.ratings), 1))
 
     def get_completion_rate(self):
         """Calculate completion rate, based on total assignments and total completions."""

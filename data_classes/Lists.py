@@ -1,6 +1,9 @@
 import logging
 import pickle
-from data_classes import Player
+from data_classes.Player import Player
+from data_classes.Task import Task
+from data_classes.Interfaces import ActionsInterface, LimitsInterfaces, CategoriesInterface, AssignmentsInterface, \
+    TasksInterface, VerificationInterface
 from discord import Emoji, User
 
 log = logging.getLogger(__name__)
@@ -79,6 +82,18 @@ class TaskList(PickledList):
         """Returns a dict mapping task_id to Task for Tasks that are assigned to a given Player."""
         raise NotImplementedError
 
+    def get_available_task_id(self):
+        """Returns an available task_id."""
+        task_id = 0
+        while task_id in self.__list:
+            task_id += 1
+        return task_id
+
+    def add_task(self, task_text: str, task_name: str = None):
+        """Creates a new Task object and records it in the TaskList."""
+        task_id = self.get_available_task_id()
+        self.__list[task_id] = Task(task_id, task_text, task_name)
+
     def cleanup_tasks(self):
         """Remove all deleted tasks."""
         raise NotImplementedError
@@ -87,8 +102,8 @@ class TaskList(PickledList):
 class InterfaceList(PickledList):
     """Manages a dictionary mapping message_id to Interface."""
 
-    def add_actionsinterface(self):
-        raise NotImplementedError
+    def add_actionsinterface(self, message_id: int):
+        self.__list[message_id] = ActionsInterface(message_id)
 
     def add_limitsinterface(self):
         raise NotImplementedError
