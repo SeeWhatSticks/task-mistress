@@ -50,6 +50,9 @@ class TaskMistress(commands.Bot):
 
     async def on_ready(self):
         log.info("We have logged in as {}".format(self.user))
+        # TODO: Check for the presence of an ActionsInterface and CategoriesInfoInterface in the infoChannel.
+        # If they don't exist, publish them.
+        # If they do, refresh the CategoriesInfoInterface.
 
     async def on_message(self, message):
         if message.author.bot:

@@ -126,6 +126,25 @@ class ActionsInterface(Interface):
         await message.add_button(SYMBOLS['BEG'], message=message)
 
 
+class CategoryInfoInterface(Interface):
+    """Interface describing Task categories."""
+    def __init__(self, bot, message_id: int):
+        super().__init__(bot, message_id)
+
+    async def build_embed(self):
+        embed = Embed(
+                title="Category Information",
+                description="This is a complete list of all Categories that can be applied to Tasks or set as a Limit.",
+                color=COLORS['default'])
+        for category in self.bot.category_list:
+            embed.add_field(
+                    name="{} {}".format(
+                            category.name,
+                            category.emoji),
+                    value=category.description)
+        return embed
+
+
 class LimitsInterfaces(Interface):
     """Interface for setting Player limits."""
     def __init__(self, bot, message_id: int, player_id: int):
@@ -138,7 +157,7 @@ class LimitsInterfaces(Interface):
         player = self.bot.player_list.get_player_by_id(self.player_id)
         embed = Embed(
                 title="Limits for {}".format(user.display_name),
-                description="Click the buttons below to toggle your limits.",
+                description="Click the buttons below to toggle your Limits.",
                 color=COLORS['default'])
         # TODO: For limit in player's limits, add field describing limit.
         return embed
