@@ -15,6 +15,26 @@ class Assignment:
 
         self.verifiers = []
 
+    @classmethod
+    def from_dict(cls, bot, d):
+        assignment = Assignment(
+                d['key'],
+                d['assigner'])
+        assignment.assignment_time = datetime.utcfromtimestamp(d['assignment_time'])
+        assignment.completed = d['completed']
+        assignment.verifiers = d['verifiers']
+        return assignment
+
+    def to_dict(self):
+        return {
+            'task_id': self.task_id,
+            'assigner': self.assigner,
+            'assignment_time': self.assignment_time.timestamp(),
+            'completed': self.completed,
+            'completion_time': self.completion_time.timestamp(),
+            'verifiers': self.verifiers
+        }
+
     def mark_completed(self):
         """Mark an assignment as completed and record the completion time."""
         self.completed = True

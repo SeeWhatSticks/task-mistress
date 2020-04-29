@@ -1,127 +1,165 @@
+import json
 import logging
-import pickle
+from typing import Any, Coroutine
+
+import data_classes.Interfaces as Interfaces
+from data_classes.Category import Category
 from data_classes.Player import Player
 from data_classes.Task import Task
-from data_classes.Interfaces import ActionsInterface, LimitsInterfaces, CategoriesInterface, AssignmentsInterface, \
-    TasksInterface, VerificationInterface
-from discord import Emoji, User
+from discord import Emoji, User, Message
+from discord.abc import Messageable
 
 log = logging.getLogger(__name__)
+logging.basicConfig()
+log.setLevel(logging.DEBUG)
 
-class PickledList:
-    """A class that creates a dictionary and manages loading and saving the dictionary to a specified pickle file."""
+class CannedDict:
+    """A class that creates a dictionary and manages loading and saving the dictionary to a specified file."""
     def __init__(self, bot, path):
         self.bot = bot
-        self.__path = path
-        self.__list = {}
+        self._path = path
+        self._list = {}
 
-        self.load()
+        self.load(bot)
+
+    def __contains__(self, key):
+        return key in self._list
+
+    def __getitem__(self, key):
+        return self._list[key]
 
     def save(self):
-        """Pickle the list and save to a file."""
-        pickle.dump(self.__list, open(self.__path, 'wb'))
+        """Serialize the list and save to a file."""
+        json.dump(
+                [v.to_dict() for v in self._list.values()],
+                open(self._path, 'w'))
 
-    def load(self):
-        """Load a file and unpickle the list."""
-        try:
-            self.__list = pickle.load(open(self.__path, 'rb'))
-        except (OSError, pickle.PickleError):
-            log.warning("Error loading {}. Storing empty file.".format(self.__path))
-            self.save()
+    def has_key(self, key):
+        """Returns True if key is present in list."""
+        return key in self._list
+
+    def get_value(self, key):
+        return self._list[key]
+
+    def get_available_key(self):
+        """Returns an available integer key."""
+        key = 0
+        while key in self._list:
+            key += 1
+        return key
+
+    def values(self):
+        return self._list.values()
 
 
-class CategoryList(PickledList):
+class CategoryList(CannedDict):
     """Manages a dictionary mapping category_id to Category."""
 
-    def get_category_by_id(self, category_id: str):
-        """Return the Category for a given category_id, or None."""
-        raise NotImplementedError
+    def load(self, bot):
+        """Load a file and deserialize the list."""
+        self._list = {v['key']: Category.from_dict(bot, v) for v in json.load(open(self._path, 'r'))}
 
     def get_category_by_emoji(self, emoji: Emoji):
         """Return the Category associated with a given Emoji, or None."""
         raise NotImplementedError
 
+    def add(self, name, emoji, description):
+        """Creates a category object and adds it to the dictionary. Returns (key, Category)."""
+        key = self.get_available_key()
+        category = Category(key, name, emoji, description)
+        self._list[key] = category
+        self.save()
+        return key, category
 
-class PlayerList(PickledList):
+class PlayerList(CannedDict):
     """Manages a dictionary mapping user_id to Player"""
+
+    def load(self, bot):
+        """Load a file and deserialize the list."""
+        self._list = {v['key']: Player.from_dict(bot, v) for v in json.load(open(self._path, 'r'))}
 
     def get_player(self, user: User):
         """Return a Player for a given user_id. Adds the Player if not already in the PlayerList."""
-        if user.id not in self.__list:
-            self.__list[user.id] = Player(user.id)
-        return self.__list[user.id]
+        if user.id not in self._list:
+            self._list[user.id] = Player(user.id)
+            self.save()
+        return self._list[user.id]
 
     def get_available_players(self):
         """Return a dict mapping player_id to Player for Players who are marked as available."""
-        return {k: v for (k, v) in self.__list.items() if v.available}
+        return {k: v for (k, v) in self._list.items() if v.available}
 
     def clear_assignments(self):
         """Clears all Assignments for all Players."""
-        for player in self.__list:
+        for player in self._list:
             player.clear_assignments()
 
 
-class TaskList(PickledList):
+class TaskList(CannedDict):
     """Manages a dictionary mapping task_id to Task."""
 
-    def get_task_by_id(self, task_id: int):
-        """Return a Task for a given task_id, or None."""
-        if task_id in self.__list:
-            return self.__list[task_id]
-        return None
+    def load(self, bot):
+        """Load a file and deserialize the list."""
+        self._list = {v['key']: Task.from_dict(bot, v) for v in json.load(open(self._path, 'r'))}
 
-    def get_tasks_by_player(self, player_id: int):
-        """Return a dict mapping task_id to Task for Tasks written by a given player."""
+    def get_tasks_by_player(self, player_key: int):
+        """Return a dict mapping task_key to Task for Tasks written by a given Player."""
         raise NotImplementedError
 
     def get_tasks_for_player(self, player: Player):
-        """Return a dict mapping task_id to Task for Tasks that are available for a given Player."""
+        """Return a dict mapping task_key to Task for Tasks that are available for a given Player."""
         raise NotImplementedError
 
     def get_assigned_tasks_for_player(self, player: Player):
-        """Returns a dict mapping task_id to Task for Tasks that are assigned to a given Player."""
+        """Returns a dict mapping task_key to Task for Tasks that are assigned to a given Player."""
         raise NotImplementedError
-
-    def get_available_task_id(self):
-        """Returns an available task_id."""
-        task_id = 0
-        while task_id in self.__list:
-            task_id += 1
-        return task_id
 
     def add_task(self, task_text: str, task_name: str = None):
         """Creates a new Task object and records it in the TaskList."""
-        task_id = self.get_available_task_id()
-        self.__list[task_id] = Task(task_id, task_text, task_name)
+        key = self.get_available_key()
+        task = Task(key, task_text, task_name)
+        self._list[key] = task
+        return key, task
 
     def cleanup_tasks(self):
         """Remove all deleted tasks."""
         raise NotImplementedError
 
 
-class InterfaceList(PickledList):
+class InterfaceList(CannedDict):
     """Manages a dictionary mapping message_id to Interface."""
 
-    def add_actionsinterface(self, message_id: int):
-        self.__list[message_id] = ActionsInterface(message_id)
+    def load(self, bot):
+        """Load a file and deserialize the list"""
+        self._list = {v['key']: Interfaces.Interface.from_dict(bot, v) for v in json.load(open(self._path, 'r'))}
 
-    def add_limitsinterface(self):
+    async def add_actions_interface(self, channel: Messageable):
+        interface = Interfaces.ActionsInterface(self.bot)
+        message = await interface.post(channel)
+        self._list[message.id] = interface
+        self.save()
+        await interface.add_buttons(message=message)
+        return message.id, interface
+
+    async def add_category_info_interface(self, channel: Messageable):
+        interface = Interfaces.CategoryInfoInterface(self.bot)
+        message = await interface.post(channel)
+        self._list[message.id] = interface
+        self.save()
+        await interface.add_buttons(message=message)
+        return message, interface
+
+    def add_limits_interface(self):
         raise NotImplementedError
 
-    def add_categoriesinterface(self):
+    def add_categories_interface(self):
         raise NotImplementedError
 
-    def add_assignmentsinterface(self):
+    def add_assignments_interface(self):
         raise NotImplementedError
 
-    def add_tasksinterface(self):
+    def add_tasks_interface(self):
         raise NotImplementedError
 
-    def add_verificationinterface(self):
+    def add_verification_interface(self):
         raise NotImplementedError
-
-    def get_interface_by_id(self, message_id: int):
-        """Return an Interface for a given message_id, or None."""
-        if message_id in self.__list:
-            return self.__list[message_id]
-        return None

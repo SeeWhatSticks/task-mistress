@@ -129,4 +129,4 @@ dmypy.json
 
 # My files
 token.txt
-data/*.p
+data/
